@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Somnus</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js?64"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script
+        type="module"
+        src="/static/app.js"
+    ></script>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+</head>
+
+<body>
+
+<main class="app">
+
+    <header class="profile">
+
+        <p class="brand glass">
+            <span>S</span>
+            <span>O</span>
+            <span>M</span>
+            <span>N</span>
+            <span>U</span>
+            <span>S</span>
+        </p>
+
+        <h1 id="profile-name">
+            ...
+        </h1>
+
+        <div class="profile-settings">
+
+            <!-- Часовой пояс -->
+
+            <div class="setting-row">
+
+                <span class="setting-name">
+                    Часовой пояс
+                </span>
+
+                <span
+                    id="timezone-value"
+                    class="setting-dropdown"
+                >
+                    ...
+                </span>
+
+                <div
+                    id="timezone-dropdown"
+                    class="dropdown glass hidden"
+                >
+
+                    <div
+                        id="timezone-dropdown-content"
+                        class="dropdown-content"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Время уведомлений -->
+
+            <div class="setting-row">
+
+                <span class="setting-name">
+                    Время уведомлений
+                </span>
+
+                <span
+                    id="reminder-value"
+                    class="setting-dropdown"
+                >
+                    ...
+                </span>
+
+            </div>
+
+
+            <!-- Уведомления -->
+
+            <div
+                class="setting-row"
+                id="notifications-row"
+            >
+
+                <span class="setting-name">
+                    Уведомления
+                </span>
+
+                <label class="switch">
+
+                    <input
+                        id="notifications-checkbox"
+                        type="checkbox"
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div
+        class="period-selector"
+        data-period="7"
+    >
+
+        <div class="period-indicator"></div>
+
+        <button
+            class="period-button"
+            data-days="7"
+        >
+            7 дней
+        </button>
+
+        <button
+            class="period-button"
+            data-days="30"
+        >
+            30 дней
+        </button>
+
+    </div>
+
+
+    <section class="summary">
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Средний сон
+            </span>
+
+            <strong id="average-duration">
+                —
+            </strong>
+
+        </div>
+
+        <div class="summary-card">
+
+            <span class="summary-label">
+                Средняя оценка
+            </span>
+
+            <strong id="average-rating">
+                —
+            </strong>
+
+        </div>
+
+    </section>
+
+
+    <p class="filled-days">
+
+        Заполнено дней:
+
+        <strong id="filled-days">
+            —
+        </strong>
+
+    </p>
+
+
+    <section class="chart-section">
+
+        <h2>
+            Время отбоя
+        </h2>
+
+        <canvas id="sleep-start-chart"></canvas>
+
+    </section>
+
+
+    <section class="chart-section">
+
+        <h2>
+            Продолжительность сна
+        </h2>
+
+        <canvas id="duration-chart"></canvas>
+
+    </section>
+
+
+    <section class="chart-section">
+
+        <h2>
+            Качество сна
+        </h2>
+
+        <canvas id="rating-chart"></canvas>
+
+    </section>
+
+</main>
+
+
+<!-- Выбор времени -->
+
+<div
+    id="time-picker-overlay"
+    class="time-picker-overlay hidden"
+>
+
+    <div class="time-picker glass">
+
+        <div class="time-picker-title">
+            Время уведомлений
+        </div>
+
+        <div class="time-picker-body">
+
+            <div class="time-picker-selection"></div>
+
+            <div
+                id="hours-wheel"
+                class="wheel"
+            >
+            </div>
+
+            <div class="separator">
+                :
+            </div>
+
+            <div
+                id="minutes-wheel"
+                class="wheel"
+            >
+            </div>
+
+        </div>
+
+        <div class="time-picker-buttons">
+
+            <button
+                id="time-picker-cancel"
+            >
+                Отмена
+            </button>
+
+            <button
+                id="time-picker-save"
+            >
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

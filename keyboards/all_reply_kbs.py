@@ -2,23 +2,13 @@ from keyboards.reply import get_reply_keyboard
 
 # start.py
 start_reply_kb = get_reply_keyboard(
-                             "заглушка",
-                             "заглушка",
-                             "заглушка на будущее",
-                             "🔗 Мониторинг Kwork",
+                             "🌙 Сделать запись за сегодня",
+                             "✏️ Изменить/добавить запись",
+                             "Статистика за неделю",
+                             "Статистика за месяц",
+                             "⚙️ Настройки",
+                             "Обратная связь",
                              placeholder="Выбери кнопку",
-                             sizes=(2, 1, 1)
+                             sizes=(1, 1, 2, 2)
                          )
 
-# kwork_monitoring.py
-def get_kwork_monitoring_kb(enabled: bool):
-
-    on_text = "✅🟢 Включен" if enabled else "🟢 Включить"
-    off_text = "✅🔴 Выключен" if not enabled else "🔴 Выключить"
-
-    return get_reply_keyboard(
-        on_text,
-        off_text,
-        placeholder="Переключатель работы",
-        sizes=(2,)
-    )

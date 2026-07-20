@@ -1,0 +1,709 @@
+/* ============================================================
+   ТЕМА
+   ============================================================ */
+
+:root {
+    --background: #eef3f9;
+    --background-glow: rgba(79, 145, 223, 0.13);
+
+    --surface: rgba(255, 255, 255, 0.7);
+    --surface-border: rgba(73, 126, 190, 0.16);
+
+    --text: #17253a;
+    --muted: #718096;
+
+    --accent: #4f91df;
+    --accent-deep: #356fb6;
+    --accent-soft: rgba(79, 145, 223, 0.16);
+
+    --warm: #bd9e6f;
+    --grid: rgba(23, 37, 58, 0.08);
+}
+
+body.dark {
+    --background: #07111f;
+    --background-glow: rgba(78, 153, 235, 0.12);
+
+    --surface: rgba(15, 31, 52, 0.76);
+    --surface-border: rgba(110, 170, 235, 0.12);
+
+    --text: #f3ede4;
+    --muted: #8291a9;
+
+    --accent: #70b7ff;
+    --accent-deep: #376fae;
+    --accent-soft: rgba(112, 183, 255, 0.14);
+
+    --warm: #ead3ad;
+    --grid: rgba(184, 211, 240, 0.08);
+}
+
+
+/* ============================================================
+   БАЗОВЫЕ ЭЛЕМЕНТЫ
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            var(--background-glow),
+            transparent 38%
+        ),
+        var(--background);
+
+    color: var(--text);
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    transition:
+        background 250ms ease,
+        color 250ms ease;
+}
+
+button {
+    font: inherit;
+}
+
+.app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px 16px 40px;
+}
+
+
+/* ============================================================
+   ОБЩИЕ СТИЛИ
+   ============================================================ */
+
+.glass {
+    background: var(--surface);
+
+    border: 1px solid var(--surface-border);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   ПРОФИЛЬ
+   ============================================================ */
+
+.profile {
+    margin-bottom: 24px;
+}
+
+.brand {
+    display: flex;
+    width: fit-content;
+
+    justify-content: center;
+    gap: 1.5em;
+
+    padding: 6px 18px;
+
+    margin: 0 auto 30px;
+
+    border-radius: 999px;
+
+    color: var(--accent);
+
+    font-size: 20px;
+    font-weight: 700;
+
+    text-shadow: 0 0 12px var(--accent-soft);
+
+    user-select: none;
+}
+
+h1 {
+    margin: 0 0 0;
+
+    color: var(--warm);
+
+    font-size: 35px;
+    font-weight: 500;
+}
+
+.profile-settings {
+    margin-top: 1px;
+}
+
+
+/* ============================================================
+   НАСТРОЙКИ
+   ============================================================ */
+
+.setting-row {
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 100%;
+    padding: 8px 0;
+
+    border-bottom: 1px solid var(--grid);
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    -webkit-tap-highlight-color: transparent;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    outline: none;
+
+    background: transparent;
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+}
+
+.setting-dropdown {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 4px 14px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    transition:
+        background .2s,
+        border-color .2s,
+        box-shadow .2s;
+}
+
+.setting-dropdown:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-soft);
+}
+
+.setting-dropdown::after {
+    content: "▾";
+
+    font-size: 16px;
+
+    color: var(--muted);
+
+    transition: transform .2s;
+}
+
+
+/* Строка со слайдером */
+
+#notifications-row {
+    cursor: default;
+}
+
+
+/* Текст */
+
+.setting-name {
+    color: var(--muted);
+}
+
+
+/* Переключатель */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    cursor: pointer;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    background: var(--background-glow);
+    border-radius: 999px;
+    transition: .25s;
+    cursor: pointer;
+}
+
+.switch input:checked + .slider {
+    background: var(--accent-deep);
+}
+
+.switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+
+    left: 3px;
+    top: 3px;
+
+    width: 22px;
+    height: 22px;
+
+    box-sizing: border-box;
+
+    border-radius: 50%;
+
+    background: white;
+
+    transition: .25s;
+}
+
+
+
+/* ============================================================
+   ПЕРЕКЛЮЧАТЕЛЬ ПЕРИОДА
+   ============================================================ */
+
+.period-selector {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    margin-bottom: 14px;
+    padding: 4px;
+
+    overflow: hidden;
+
+    background: var(--surface);
+
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.06);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.period-indicator {
+    position: absolute;
+
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+
+    width: calc(50% - 4px);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent-deep)
+        );
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 0 20px var(--accent-soft);
+
+    transition:
+        transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.period-selector[data-period="30"] .period-indicator {
+    transform: translateX(100%);
+}
+
+.period-button {
+    position: relative;
+    z-index: 1;
+
+    padding: 10px;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+    color: var(--text);
+
+    font-size: 15px;
+    font-weight: 500;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.period-button:hover,
+.period-button:focus,
+.period-button:active {
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    margin-bottom: 16px;
+}
+
+
+/* ============================================================
+   КАРТОЧКИ СТАТИСТИКИ
+   ============================================================ */
+
+.summary-card,
+.chart-section {
+    background: var(--surface);
+
+    border: 1px solid var(--surface-border);
+    border-radius: 18px;
+
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.1);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.summary-card {
+    min-width: 0;
+    padding: 16px;
+}
+
+.summary-label {
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: var(--muted);
+
+    font-size: 14px;
+}
+
+.summary strong {
+    display: block;
+
+    color: var(--text);
+
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+
+/* ============================================================
+   ГРАФИКИ
+   ============================================================ */
+
+.chart-section {
+    margin-bottom: 16px;
+    padding: 18px 16px 14px;
+}
+
+.chart-section h2 {
+    margin: 0 0 18px;
+
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.chart-section canvas {
+    width: 100% !important;
+}
+
+/* ============================================================
+   ВЫПАДАЮЩИЕ СПИСКИ
+   ============================================================ */
+
+.dropdown {
+    position: absolute;
+
+    top: 100%;
+    right: 0;
+
+    min-width: 110px;
+
+    overflow: hidden;
+
+    border-radius: 14px;
+
+    z-index: 100;
+}
+
+.dropdown.hidden {
+    display: none;
+}
+
+.dropdown-content {
+    max-height: 240px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+}
+
+.dropdown-content::-webkit-scrollbar {
+    width: 7px;
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+    background: var(--surface-border);
+    border-radius: 999px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+
+    min-height: 42px;
+
+    padding: 0 14px;
+
+    color: var(--text);
+
+    cursor: pointer;
+
+    transition: background .15s;
+}
+
+.dropdown-item:hover {
+    background: var(--accent-soft);
+}
+
+.dropdown-item.selected {
+    color: var(--accent);
+    font-weight: 600;
+}
+/* ============================================================
+   АДАПТИВНОСТЬ
+   ============================================================ */
+
+@media (max-width: 380px) {
+    .app {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .summary {
+        gap: 8px;
+    }
+
+    .summary-card {
+        padding: 14px 12px;
+    }
+
+    .summary strong {
+        font-size: 18px;
+    }
+}
+
+
+/* ============================================================
+   ВЫБОР ВРЕМЕНИ(КОЛЕСО)
+   ============================================================ */
+
+.time-picker-overlay {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.time-picker {
+    width: 300px;
+
+    padding: 24px;
+
+    border-radius: 22px;
+}
+
+.time-picker-title {
+    margin-bottom: 20px;
+
+    text-align: center;
+
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.time-picker-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.time-picker-selection {
+    position: absolute;
+
+    left: 22px;
+    right: 22px;
+
+    top: 68px;
+
+    height: 44px;
+
+    border: 1px solid var(--accent-soft);
+    border-radius: 10px;
+
+    background: rgba(79, 145, 223, 0.08);
+
+    pointer-events: none;
+
+    z-index: 2;
+}
+
+.wheel {
+    width: 70px;
+    height: 180px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    scroll-snap-type: y mandatory;
+    padding-top: 68px;
+    padding-bottom: 68px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.wheel-item {
+    height: 44px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    scroll-snap-align: center;
+
+    color: var(--text);
+
+    opacity: .25;
+
+    transform: scale(.82);
+
+    transition:
+        opacity .18s,
+        transform .18s,
+        color .18s,
+        font-weight .18s;
+}
+
+.wheel-item.near {
+    opacity: .6;
+    transform: scale(.92);
+}
+
+.wheel-item.selected {
+    opacity: 1;
+
+    color: var(--accent);
+
+    font-weight: 600;
+
+    transform: scale(1.12);
+
+    text-shadow: 0 0 10px var(--accent-soft);
+}
+
+.separator {
+    font-size: 32px;
+    font-weight: 700;
+
+    transform: translateY(-2px);
+}
+
+.time-picker-buttons {
+    display: flex;
+    gap: 12px;
+
+    margin-top: 28px;
+}
+
+.time-picker-buttons button {
+    flex: 1;
+
+    padding: 12px 0;
+
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+
+    background: var(--surface);
+
+    color: var(--text);
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    outline: none;
+
+    -webkit-tap-highlight-color: transparent;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s,
+        transform .15s;
+}
+
+.time-picker-buttons button:hover,
+.time-picker-buttons button:focus,
+.time-picker-buttons button:active {
+    background: var(--surface);
+
+    outline: none;
+    box-shadow: none;
+}
+
+.time-picker-buttons button:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px var(--accent-soft);
+}
+
+.time-picker-buttons button:active {
+    transform: scale(.98);
+}

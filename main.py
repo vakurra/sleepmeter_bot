@@ -1,30 +1,53 @@
 import asyncio
-from aiogram import Bot, Dispatcher
-from aiogram.enums import ParseMode
-from aiogram.client.default import DefaultBotProperties
 
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from middlewares.global_action import GlobalActionMiddleware
+from middlewares.throttling import ThrottlingMiddleware
+
+from commands import set_bot_commands
 from config import BOT_TOKEN
 from handlers import get_routers
-from commands import set_bot_commands
-from utils.is_admin import IsAdmin
+from scheduler.reminders import reminder_scheduler
+from database.session import engine
 
+# Создание бота
+bot = Bot(
+    token=BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+)
 
-#Cоздание бота
-bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
-dp.message.filter(IsAdmin())
-dp.callback_query.filter(IsAdmin())
+dp.message.outer_middleware(GlobalActionMiddleware())
+dp.message.outer_middleware(ThrottlingMiddleware())
+
+
 
 # Подключение роутеров команд
 for router in get_routers():
     dp.include_router(router)
 
+
 async def main():
+    scheduler_task = asyncio.create_task(reminder_scheduler(bot, dp))
+
     try:
         await set_bot_commands(bot)
         await dp.start_polling(bot)
+
     except Exception as e:
         print(f"Критическая ошибка! Бот остановлен: {e}")
+
+    finally:
+        scheduler_task.cancel()
+
+        try:
+            await scheduler_task
+        except asyncio.CancelledError:
+            pass
+        
+        await engine.dispose()
         await bot.session.close()
 
 

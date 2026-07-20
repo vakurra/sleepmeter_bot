@@ -3,4 +3,5 @@ venv/
 __pycache__/
 .idea/
 .vscode/
-bot.service
+sleepmeter_bot.service
+sleepmeter_bot_api.service

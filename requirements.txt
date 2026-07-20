@@ -1,3 +1,7 @@
 aiogram
 dotenv
-requests
+sqlalchemy
+aiomysql
+alembic
+cachetools
+fastapi[standard]
