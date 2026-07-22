@@ -25,17 +25,19 @@ Telegram-бот для ведения дневника сна. Позволяе�
 
 <table align="center">
   <tr>
-    <td align="center">
-      <img src="assets/screenshots/menu.jpg" width="250"><br>
-      Главное меню
+    <td style="padding: 0 8px;">
+      <img src="assets/screenshots/menu.jpg" width="250">
     </td>
-    <td align="center">
-      <img src="assets/screenshots/reminder_time.jpg" width="250"><br>
-      Настройка напоминаний
+    <td style="padding: 0 8px;">
+      <img src="assets/screenshots/reminder_time.jpg" width="250">
     </td>
-    <td align="center">
-      <img src="assets/screenshots/web.jpg" width="250"><br>
-      Web-интерфейс
+    <td style="padding: 0 8px;">
+      <img src="assets/screenshots/web.jpg" width="250">
     </td>
+  </tr>
+  <tr>
+    <td align="center">Главное меню</td>
+    <td align="center">Напоминания</td>
+    <td align="center">Web-интерфейс</td>
   </tr>
 </table>
