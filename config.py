@@ -5,7 +5,7 @@ load_dotenv()
 
 # Бот
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_ID = int(os.getenv("ADMIN_ID"))
+OWNER_ID = int(os.getenv("OWNER_ID"))
 
 # БД
 DB_HOST = os.getenv("DB_HOST")

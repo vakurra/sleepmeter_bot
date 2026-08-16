@@ -7,8 +7,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database.session import SessionLocal
-from services.sleep_service import SleepService
-from services.user_service import UserService
+from services.db.sleep import SleepService
+from services.db.user import UserService
 from web.auth import get_telegram_init_data
 from web.schemas import UpdateProfileRequest
 

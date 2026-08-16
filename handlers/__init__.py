@@ -3,13 +3,17 @@ import pkgutil
 
 from aiogram import Router
 
-# Получение всех роутеров
-def get_routers():
 
+def get_routers(package_name=__name__):
     routers = []
 
-    for module_info in pkgutil.iter_modules(__path__):
-        module = importlib.import_module(f"{__name__}.{module_info.name}")
+    package = importlib.import_module(package_name)
+
+    for module_info in pkgutil.walk_packages(
+        package.__path__,
+        package.__name__ + ".",
+    ):
+        module = importlib.import_module(module_info.name)
 
         for obj in vars(module).values():
             if isinstance(obj, Router):

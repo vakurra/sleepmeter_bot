@@ -1,18 +1,19 @@
 from datetime import datetime, timedelta, timezone
 
-from aiogram import F, Router, types
+from aiogram import F, Router
 from aiogram.methods import SendRichMessage
-from aiogram.types import InputRichMessage
+from aiogram.types import Message, InputRichMessage
 
 from database.session import SessionLocal
-from services.sleep_service import SleepService
-from services.user_service import UserService
+from services.bot.text import TextService
+from services.db.sleep import SleepService
+from services.db.user import UserService
 
 
 statistics_router = Router()
 
 
-async def send_statistics(message: types.Message, days: int):
+async def send_statistics(message: Message, days: int, text: TextService):
     """Формирует и отправляет статистику сна за указанный период."""
 
     async with SessionLocal() as session:
@@ -21,7 +22,10 @@ async def send_statistics(message: types.Message, days: int):
 
         user = await user_service.get_by_id(message.from_user.id)
 
-        local_datetime = datetime.now(timezone.utc) + timedelta(hours=user.utc_offset)
+        local_datetime = (
+            datetime.now(timezone.utc) + timedelta(hours=user.utc_offset)
+        )
+
         date_to = local_datetime.date()
         date_from = date_to - timedelta(days=days - 1)
 
@@ -32,17 +36,30 @@ async def send_statistics(message: types.Message, days: int):
         )
 
     if not records:
-        await message.answer(
-            f"📊 За последние {days} дней пока нет данных о сне."
-        )
+        await message.answer(text("statistics-empty", days=days))
         return
 
-    total_duration = sum(record.sleep_duration for record in records)
+    total_duration = sum(
+        record.sleep_duration
+        for record in records
+    )
+
     average_duration = total_duration // len(records)
     average_hours, average_minutes = divmod(average_duration, 60)
-    average_rating = round(sum(record.sleep_rating for record in records) / len(records), 2)
 
-    table_rows = []
+    average_duration_text = (
+        f"{average_hours} ч"
+        if average_minutes == 0
+        else f"{average_hours} ч {average_minutes} мин"
+    )
+
+    average_rating = round(
+        sum(record.sleep_rating for record in records)
+        / len(records),
+        2,
+    )
+
+    rows = []
 
     for record in records:
         hours, minutes = divmod(record.sleep_duration, 60)
@@ -55,47 +72,55 @@ async def send_statistics(message: types.Message, days: int):
 
         rating = "⭐" * record.sleep_rating
 
-        table_rows.append(
-            f"| {record.record_date:%d.%m} "
-            f"| {record.sleep_start:%H:%M} "
-            f"| {record.sleep_end:%H:%M} "
-            f"| {duration_text} "
-            f"| {rating} |"
+        rows.append(
+            f"{record.record_date:%d.%m} | "
+            f"{record.sleep_start:%H:%M} | "
+            f"{record.sleep_end:%H:%M} | "
+            f"{duration_text} | "
+            f"{rating}"
         )
 
-    rich_markdown = (
-        f"## 📊 Статистика за последние {days} дней\n\n"
-        f"**Заполнено дней:** {len(records)} из {days}\n\n"
-        f"**Средняя продолжительность сна:** "
-        f"{average_hours} ч {average_minutes} мин\n\n"
-        f"**Средняя оценка:** {average_rating}\n\n"
-        "| Дата | Отбой | Подъем | Сон | Качество |\n"
-        "|:----:|:-----:|:------:|----:|:--------:|\n"
-        + "\n".join(table_rows)
+    rich_message = InputRichMessage(
+        blocks=[
+            text.heading("statistics-title", days=days),
+            text.paragraph(
+                "statistics-filled-days",
+                filled_days=len(records),
+                days=days,
+            ),
+            text.paragraph(
+                "statistics-average-duration",
+                average_duration=average_duration_text,
+            ),
+            text.paragraph(
+                "statistics-average-rating",
+                average_rating=average_rating,
+            ),
+            text.table(
+                "statistics-table",
+                striped=True,
+                rows="\n".join(rows),
+            ),
+        ],
     )
 
     await message.bot(
         SendRichMessage(
             chat_id=message.chat.id,
-            rich_message=InputRichMessage(
-                markdown=rich_markdown,
-            ),
+            rich_message=rich_message,
         )
     )
 
 
-@statistics_router.message(F.text == "Статистика за неделю")
-async def get_week_statistics(message: types.Message):
+@statistics_router.message(F.text == "Статистика за 7 дней")
+async def get_week_statistics(message: Message, text: TextService):
     """Отправляет статистику сна за последние 7 дней."""
 
-    await send_statistics(message, 7)
+    await send_statistics(message, 7, text)
 
 
 @statistics_router.message(F.text == "Статистика за месяц")
-async def get_month_statistics(message: types.Message): 
+async def get_month_statistics(message: Message, text: TextService):
     """Отправляет статистику сна за последние 30 дней."""
 
-    await send_statistics(message, 30)
-
-
-# TODO: свернуть таблицу месячной статистики в RichBlockDetails.(пока не разобрался в документации)
+    await send_statistics(message, 30, text)

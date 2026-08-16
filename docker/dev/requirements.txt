@@ -1,0 +1,10 @@
+aiogram
+python-dotenv
+sqlalchemy
+asyncpg
+psycopg[binary]
+alembic
+fluent.runtime
+cachetools
+fastapi[standard]
+watchfiles

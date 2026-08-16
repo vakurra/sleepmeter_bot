@@ -6,16 +6,17 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove
 
 from database.session import SessionLocal
-from keyboards.all_inline_kbs import (
+from keyboards.inline.sleep_record import (
     get_cancel_record_kb,
     get_sleep_end_kb,
     get_sleep_rating_kb,
     get_sleep_start_kb
 )
-from keyboards.all_reply_kbs import start_reply_kb
-from services import sleep_record_flow
-from services.sleep_service import SleepService
-from services.user_service import UserService
+from keyboards.reply.start_menu import start_reply_kb
+from services.bot import sleep_record_flow
+from services.bot.text import TextService
+from services.db.sleep import SleepService
+from services.db.user import UserService
 from utils.parsers import parse_time, parse_date
 
 
@@ -31,28 +32,21 @@ class SleepRecordStates(StatesGroup):
     sleep_rating = State()
 
 
-@sleep_router.message(F.text == "✏️ Изменить/добавить запись")
-async def start_change_record(message: types.Message, state: FSMContext):
+@sleep_router.message(F.text == "Изменить/добавить запись")
+async def start_change_record(message: types.Message, state: FSMContext, text: TextService):
     """Начало изменения записи."""
 
     await state.set_state(SleepRecordStates.choose_date)
 
-    await message.answer(
-        "📅 Введите дату записи.\n\n"
-        "Например: 05.07.2026 или 05.07.26",
-        reply_markup=get_cancel_record_kb(),
-    )
+    await message.answer(text("sleep-record-date"), reply_markup=get_cancel_record_kb())
 
 
 @sleep_router.message(SleepRecordStates.choose_date)
-async def choose_record_date(message: types.Message, state: FSMContext):
+async def choose_record_date(message: types.Message, state: FSMContext, text: TextService):
     try:
         record_date = parse_date(message.text)
     except ValueError:
-        await message.answer(
-            "❌ Некорректная дата.\n\n"
-            "Введите дату в формате ДД.ММ.ГГГГ."
-        )
+        await message.answer(text("sleep-record-date-invalid"))
         return
 
     async with SessionLocal() as session:
@@ -65,8 +59,7 @@ async def choose_record_date(message: types.Message, state: FSMContext):
 
         if record:
             await message.answer(
-                f"📅 Найдена запись за {record_date:%d.%m.%Y}.\n"
-                "Изменяем её.",
+                text("sleep-record-edit-for", record_date=f"{record_date:%d.%m.%Y}"),
                 reply_markup=ReplyKeyboardRemove(),
             )
 
@@ -74,22 +67,22 @@ async def choose_record_date(message: types.Message, state: FSMContext):
 
         else:
             await message.answer(
-                f"📅 Записи за {record_date:%d.%m.%Y} нет.\n"
-                "Создаем новую.",
+                text("sleep-record-create-for", record_date=f"{record_date:%d.%m.%Y}"),
                 reply_markup=ReplyKeyboardRemove(),
             )
 
             edit_mode = False
+
         await state.update_data(record_date=record_date, edit_mode=edit_mode)
         await state.set_state(SleepRecordStates.sleep_start)
 
-        question = await message.answer("🌙 Во сколько вы легли спать?", reply_markup=get_sleep_start_kb())
+        question = await message.answer(text("sleep-record-start"), reply_markup=get_sleep_start_kb())
 
         await state.update_data(wizard_message_id=question.message_id)
 
 
-@sleep_router.message(F.text == "🌙 Сделать запись за сегодня")
-async def add_sleep_record(message: types.Message, state: FSMContext):
+@sleep_router.message(F.text == "Сделать запись за сегодня")
+async def add_sleep_record(message: types.Message, state: FSMContext, text: TextService):
     """Начало добавления записи."""
 
     async with SessionLocal() as session:
@@ -101,21 +94,18 @@ async def add_sleep_record(message: types.Message, state: FSMContext):
         record = await sleep_service.get_by_date(user_id=user.id, record_date=record_date)
 
     if record:
-        await message.answer(
-            "⚠️ Запись за сегодняшний день уже существует.",
-            reply_markup=start_reply_kb,
-        )
+        await message.answer(text("sleep-record-exist"), reply_markup=start_reply_kb)
         return
     
     await state.set_state(SleepRecordStates.sleep_start)
     await state.update_data(record_date=record_date, edit_mode=False)
 
     await message.answer(
-        f"📅 Запись за: {record_date:%d.%m.%Y}",
+        text("sleep-record-for", record_date=f"{record_date:%d.%m.%Y}"),
         reply_markup=ReplyKeyboardRemove(),
     )
 
-    question = await message.answer("🌙 Во сколько вы легли спать?", reply_markup=get_sleep_start_kb())
+    question = await message.answer(text("sleep-record-start"), reply_markup=get_sleep_start_kb())
 
 
 @sleep_router.callback_query(
@@ -131,29 +121,23 @@ async def select_sleep_start(call: CallbackQuery, state: FSMContext):
 
 
 @sleep_router.callback_query(SleepRecordStates.sleep_start, F.data == "sleep_start_manual")
-async def manual_sleep_start(call: CallbackQuery, state: FSMContext):
+async def manual_sleep_start(call: CallbackQuery, state: FSMContext, text: TextService):
     """Переход к ручному вводу времени."""
 
     await state.set_state(SleepRecordStates.sleep_start_manual)
-    await call.message.edit_text(
-        "⌨️ Введите время отхода ко сну в формате ЧЧ:ММ.\n\n"
-        "Например: 23:45"
-    )
+    await call.message.edit_text(text("sleep-record-start-manual"))
     await call.answer()
 
 
 @sleep_router.message(SleepRecordStates.sleep_start_manual)
-async def input_sleep_start(message: types.Message, state: FSMContext):
+async def input_sleep_start(message: types.Message, state: FSMContext, text: TextService):
     """Ручной ввод времени отхода ко сну."""
 
     try:
         sleep_start = parse_time(message.text)
 
     except ValueError:
-        await message.answer(
-            "❌ Некорректный формат.\n\n"
-            "Введите время в формате ЧЧ:ММ."
-        )
+        await message.answer(text("sleep-record-time-invalid"))
         return
 
     await state.update_data(sleep_start=sleep_start,)
@@ -177,33 +161,24 @@ async def select_sleep_end(call: CallbackQuery, state: FSMContext):
     await sleep_record_flow.ask_sleep_rating(call, state, SleepRecordStates.sleep_rating)
 
 
-@sleep_router.callback_query(
-    SleepRecordStates.sleep_end,
-    F.data == "sleep_end_manual",
-)
-async def manual_sleep_end(call: CallbackQuery, state: FSMContext):
+@sleep_router.callback_query(SleepRecordStates.sleep_end, F.data == "sleep_end_manual")
+async def manual_sleep_end(call: CallbackQuery, state: FSMContext, text: TextService):
     """Переход к ручному вводу времени пробуждения."""
 
     await state.set_state(SleepRecordStates.sleep_end_manual)
-    await call.message.edit_text(
-        "⌨️ Введите время пробуждения в формате ЧЧ:ММ.\n\n"
-        "Например: 08:30"
-    )
+    await call.message.edit_text(text("sleep-record-wakeup-manual"))
     await call.answer()
 
 
 @sleep_router.message(SleepRecordStates.sleep_end_manual)
-async def input_sleep_end(message: types.Message, state: FSMContext):
+async def input_sleep_end(message: types.Message, state: FSMContext, text: TextService):
     """Ручной ввод времени пробуждения."""
 
     try:
         sleep_end = parse_time(message.text)
 
     except ValueError:
-        await message.answer(
-            "❌ Некорректный формат.\n\n"
-            "Введите время в формате ЧЧ:ММ."
-        )
+        await message.answer(text("sleep-record-time-invalid"))
         return
 
     await state.update_data(sleep_end=sleep_end)
@@ -215,26 +190,20 @@ async def input_sleep_end(message: types.Message, state: FSMContext):
 
 
 @sleep_router.callback_query(SleepRecordStates.sleep_end, F.data == "sleep_back")
-async def back_to_sleep_start(call: CallbackQuery, state: FSMContext):
+async def back_to_sleep_start(call: CallbackQuery, state: FSMContext, text: TextService):
     """Возврат к выбору времени отхода ко сну."""
 
     await state.set_state(SleepRecordStates.sleep_start)
-    await call.message.edit_text(
-        "🌙 Во сколько вы легли спать?",
-        reply_markup=get_sleep_start_kb(),
-    )
+    await call.message.edit_text(text("sleep-record-start"), reply_markup=get_sleep_start_kb())
     await call.answer()
 
 
 @sleep_router.callback_query(SleepRecordStates.sleep_rating, F.data == "sleep_rating_back")
-async def back_to_sleep_end(call: CallbackQuery, state: FSMContext):
+async def back_to_sleep_end(call: CallbackQuery, state: FSMContext, text: TextService):
     """Возвращает к выбору времени пробуждения."""
 
     await state.set_state(SleepRecordStates.sleep_end)
-    await call.message.edit_text(
-        "Во сколько проснулись?",
-        reply_markup=get_sleep_end_kb(),
-    )
+    await call.message.edit_text(text("sleep-record-wakeup"), reply_markup=get_sleep_end_kb())
     await call.answer()
 
 
@@ -247,10 +216,10 @@ async def select_sleep_rating(call: CallbackQuery, state: FSMContext):
 
 
 @sleep_router.callback_query(F.data == "sleep_cancel")
-async def cancel_sleep_record(call: CallbackQuery, state: FSMContext):
+async def cancel_sleep_record(call: CallbackQuery, state: FSMContext, text: TextService):
     """Отменяет добавление записи."""
 
     await state.clear()
-    await call.message.edit_text("❌ Добавление записи отменено.")
-    await call.message.answer("Что хотите сделать дальше?", reply_markup=start_reply_kb)
+    await call.message.edit_text(text("sleep-record-cancel"))
+    await call.message.answer(text("start-whats-next"), reply_markup=start_reply_kb)
     await call.answer()

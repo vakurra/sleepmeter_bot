@@ -1,0 +1,60 @@
+services:
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: sleepmeter_bot_db
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bot:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+
+    container_name: sleepmeter_bot
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+
+    container_name: sleepmeter_web
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    working_dir: /app
+
+    command: uvicorn web.app:app --host 0.0.0.0 --port 8000
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

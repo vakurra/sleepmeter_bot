@@ -66,22 +66,18 @@ async function initApp() {
 
     applyTheme();
 
-    try {
+    const results = await Promise.allSettled([
+        loadProfile(),
+        loadStatistics(7),
+    ]);
 
-        await Promise.all([
-            loadProfile(),
-            loadStatistics(7),
-        ]);
-
-        initSettings();
-
+    for (const result of results) {
+        if (result.status === "rejected") {
+            console.error("Не удалось загрузить данные Mini App", result.reason);
+        }
     }
 
-    catch (error) {
-
-        console.error(error);
-
-    }
+    initSettings();
 
 }
 

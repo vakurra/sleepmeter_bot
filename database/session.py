@@ -3,13 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
 
 
-# Строка подключения к MySQL через асинхронный драйвер aiomysql.
-DATABASE_URL = (f"mysql+aiomysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
+# Строка подключения к PostGRE через асинхронный драйвер.
+DATABASE_URL = (f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 # Асинхронный движок SQLAlchemy.
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,  # перед деплоем поменять на false. выводит в консоль каждый запрос
+    echo=False,
 )
 
 # Фабрика для создания независимых асинхронных сессий.

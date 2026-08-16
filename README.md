@@ -19,7 +19,7 @@ Telegram-бот для ведения дневника сна. Позволяе�
 - FastAPI
 - SQLAlchemy
 - Alembic
-- MySQL
+- PostGRE
 
 ## Скриншоты
 

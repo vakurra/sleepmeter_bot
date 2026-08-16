@@ -2,10 +2,19 @@ const tg =
     window.Telegram.WebApp;
 
 
-const apiHeaders = {
-    Authorization: `tma ${tg.initData}`,
-    "Content-Type": "application/json",
-};
+function getApiHeaders() {
+    return {
+        Authorization: `tma ${tg.initData}`,
+        "Content-Type": "application/json",
+    };
+}
+
+
+function delay(milliseconds) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, milliseconds);
+    });
+}
 
 
 export async function apiRequest(
@@ -13,18 +22,42 @@ export async function apiRequest(
     options = {},
 ) {
 
-    const response = await fetch(
-        url,
-        {
-            headers: apiHeaders,
-            ...options,
-        },
-    );
+    let response;
+    let lastError;
 
-    if (!response.ok) {
-        throw new Error(
-            `${response.status} ${response.statusText}`,
-        );
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+            response = await fetch(
+                url,
+                {
+                    ...options,
+                    headers: {
+                        ...getApiHeaders(),
+                        ...(options.headers || {}),
+                    },
+                    // Данные профиля и статистики персональные и не должны
+                    // браться из кэша Telegram WebView.
+                    cache: "no-store",
+                },
+            );
+
+            if (response.ok || response.status === 204) {
+                break;
+            }
+
+            lastError = new Error(
+                `${response.status} ${response.statusText}`,
+            );
+        }
+        catch (error) {
+            lastError = error;
+        }
+
+        await delay(250 * (attempt + 1));
+    }
+
+    if (!response || !response.ok) {
+        throw lastError || new Error("API request failed");
     }
 
     if (response.status === 204) {

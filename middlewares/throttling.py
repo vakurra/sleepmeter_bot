@@ -6,6 +6,7 @@ from typing import Any, Awaitable, Callable, Dict, Optional, Union
 from aiogram import BaseMiddleware
 from aiogram.types import CallbackQuery, Message
 from cachetools import TTLCache
+from services.bot.text import TextService
 
 
 EventType = Union[
@@ -13,6 +14,7 @@ EventType = Union[
     CallbackQuery,
 ]
 
+text = TextService()
 
 @dataclass
 class UserThrottleState:
@@ -33,7 +35,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         ban_time: float = 30.0,
         cache_ttl: float = 300.0,
         max_users: int = 10000,
-        throttle_message: Optional[str] = ("Слишком много запросов.\nПопробуйте снова через 30 секунд."),
+        throttle_message: Optional[str] = text("antispam"),
     ) -> None:
 
         self.debounce = debounce

@@ -11,10 +11,10 @@ from database.models import User
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-# Alembic работает через синхронный драйвер PyMySQL.
+# Alembic работает через синхронный драйвер psycopg.
 config.set_main_option(
     "sqlalchemy.url",
-    DATABASE_URL.replace("mysql+aiomysql", "mysql+pymysql"),
+    DATABASE_URL.replace("postgresql+asyncpg", "postgresql+psycopg"),
 )
 
 # Interpret the config file for Python logging.

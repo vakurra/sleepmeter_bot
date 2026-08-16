@@ -1,7 +1,9 @@
 aiogram
-dotenv
+python-dotenv
 sqlalchemy
-aiomysql
+asyncpg
+psycopg[binary]
 alembic
+fluent.runtime
 cachetools
 fastapi[standard]

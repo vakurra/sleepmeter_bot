@@ -411,6 +411,8 @@ function renderRatingChart(records) {
                     grid: {
                         display: false,
                     },
+    // Настройки не должны зависеть от того, успешно ли загрузилась статистика.
+    // При следующем открытии/переключении данные будут запрошены снова.
                 },
             },
         },
@@ -421,9 +423,7 @@ function renderRatingChart(records) {
 export function renderCharts(records) {
 
     renderSleepStartChart(records);
-
     renderDurationChart(records);
-
     renderRatingChart(records);
 
 }

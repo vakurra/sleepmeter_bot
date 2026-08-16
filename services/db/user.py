@@ -19,6 +19,31 @@ class UserService:
 
         return await self.session.scalar(select(User).where(User.id == user_id))
 
+
+    async def get_all(self) -> list[User]:
+        """Возвращает всех пользователей."""
+
+        stmt = select(User).order_by(User.created_at.desc())
+        result = await self.session.scalars(stmt)
+
+        return list(result.all())
+
+
+    async def get_new(self, days: int) -> list[User]:
+        """Возвращает пользователей, зарегистрированных за последние N дней."""
+
+        since = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days)
+
+        stmt = (
+            select(User)
+            .where(User.created_at >= since)
+            .order_by(User.created_at.desc())
+        )
+
+        result = await self.session.scalars(stmt)
+
+        return list(result.all())
+
     
     async def get_admins(self) -> list[User]:
         """Возвращает всех администраторов."""
