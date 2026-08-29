@@ -31,8 +31,11 @@ def build_users_text(
     rows = [
         f"{escape_table_value(user.first_name or 'Без имени')} | "
         f"@{escape_table_value(user.username or 'нет')} | "
-        f"{user.created_at:%d.%m.%Y}"
-        for user in users
+        f"{user.created_at:%d.%m.%Y} | "
+        f"{escape_table_value(user.referred_by or '—')} | "
+        f"{sleep_records_count} | "
+        f"{'✅' if user.notifications_enabled else '❌'}"
+        for user, sleep_records_count in users
     ]
 
     return InputRichMessage(
@@ -44,6 +47,39 @@ def build_users_text(
             ),
             text.table(
                 "admin-users-table",
+                header=True,
+                striped=True,
+                rows="\n".join(rows),
+            ),
+        ],
+    )
+
+
+def build_new_users_text(
+    users,
+    text: TextService,
+    title_key: str,
+    **kwargs,
+) -> InputRichMessage:
+    """Формирует Rich Message со списком новых пользователей."""
+
+    rows = [
+        f"{escape_table_value(user.first_name or 'Без имени')} | "
+        f"@{escape_table_value(user.username or 'нет')} | "
+        f"{user.created_at:%d.%m.%Y} | "
+        f"{escape_table_value(user.referred_by or '—')}"
+        for user in users
+    ]
+
+    return InputRichMessage(
+        blocks=[
+            text.heading(
+                title_key,
+                size=3,
+                **kwargs,
+            ),
+            text.table(
+                "admin-users-new-table",
                 header=True,
                 striped=True,
                 rows="\n".join(rows),
@@ -83,7 +119,7 @@ async def show_all_users(
 
     async with SessionLocal() as session:
         user_service = UserService(session)
-        users = await user_service.get_all()
+        users = await user_service.get_all_with_stats()
 
     rich_message = build_users_text(
         users,
@@ -113,7 +149,7 @@ async def show_new_users(
         user_service = UserService(session)
         users = await user_service.get_new(7)
 
-    rich_message = build_users_text(
+    rich_message = build_new_users_text(
         users,
         text,
         "admin-users-new-title",

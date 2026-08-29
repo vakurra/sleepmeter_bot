@@ -1,10 +1,10 @@
 from datetime import date, datetime, time, timedelta, timezone
 
 from aiogram.types import User as TgUser
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import User, UserRole
+from database.models import SleepRecord, User, UserRole
 
 
 class UserService:
@@ -27,6 +27,27 @@ class UserService:
         result = await self.session.scalars(stmt)
 
         return list(result.all())
+
+
+    async def get_all_with_stats(self):
+        """Возвращает всех пользователей с количеством записей сна."""
+
+        stmt = (
+            select(
+                User,
+                func.count(SleepRecord.id).label("sleep_records_count"),
+            )
+            .outerjoin(
+                SleepRecord,
+                SleepRecord.user_id == User.id,
+            )
+            .group_by(User.id)
+            .order_by(User.created_at.desc())
+        )
+
+        result = await self.session.execute(stmt)
+
+        return result.all()
 
 
     async def get_new(self, days: int) -> list[User]:

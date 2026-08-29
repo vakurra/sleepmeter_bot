@@ -230,7 +230,11 @@ admin-users-new-title =
     Новые пользователи за 7 дней ({ $count })
 
 admin-users-table =
-    Имя | Username | Регистрация
+    Имя | Username | Регистрация | Откуда пришёл | Записей | Напоминания
+    { $rows }
+
+admin-users-new-table =
+    Имя | Username | Регистрация | Откуда пришёл
     { $rows }
 
 
