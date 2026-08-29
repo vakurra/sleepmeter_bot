@@ -14,6 +14,12 @@ admin_users_router.message.middleware(AdminMiddleware())
 admin_users_router.callback_query.middleware(AdminMiddleware())
 
 
+def escape_table_value(value: str) -> str:
+    """Экранирует символы, используемые как разделители таблицы."""
+
+    return value.replace("|", "¦")
+
+
 def build_users_text(
     users,
     text: TextService,
@@ -23,8 +29,8 @@ def build_users_text(
     """Формирует Rich Message со списком пользователей."""
 
     rows = [
-        f"{user.first_name or 'Без имени'} | "
-        f"@{user.username or 'нет'} | "
+        f"{escape_table_value(user.first_name or 'Без имени')} | "
+        f"@{escape_table_value(user.username or 'нет')} | "
         f"{user.created_at:%d.%m.%Y}"
         for user in users
     ]
