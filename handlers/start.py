@@ -11,6 +11,7 @@ from database.session import SessionLocal
 from keyboards.inline.registration import get_reminder_time_kb, get_utc_offset_kb
 from keyboards.reply.start_menu import start_reply_kb
 from services.db.user import UserService
+from services.db.ad import AdService
 
 
 start_router = Router()
@@ -25,18 +26,35 @@ class UserRegistration(StatesGroup):
 
 @start_router.message(Command("start"))
 async def start_command(message: Message, state: FSMContext, text: TextService):
-
     async with SessionLocal() as session:
-
         user_service = UserService(session)
         user = await user_service.get_by_id(message.from_user.id)
         name = message.from_user.first_name
 
         if user:
-            await message.answer(text("start-return", name=name), reply_markup=start_reply_kb)
+            await message.answer(
+                text("start-return", name=name),
+                reply_markup=start_reply_kb,
+            )
             return
 
+        referred_by = None
+
+        if message.text:
+            parts = message.text.split(maxsplit=1)
+
+            if len(parts) == 2:
+                campaign_name = parts[1].strip()
+
+                ad_service = AdService(session)
+                ad = await ad_service.get_by_campaign_name(campaign_name)
+
+                if ad:
+                    referred_by = ad.campaign_name
+
+    await state.update_data(referred_by=referred_by)
     await state.set_state(UserRegistration.utc_offset)
+
     timezone_photo = FSInputFile("assets/images/q1.png")
 
     await message.answer_photo(
@@ -101,6 +119,7 @@ async def process_reminder_time(call: CallbackQuery, state: FSMContext, text: Te
             tg_user=call.from_user,
             utc_offset=data["utc_offset"],
             reminder_time=reminder_time,
+            referred_by=data["referred_by"],
         )
 
     await state.clear()

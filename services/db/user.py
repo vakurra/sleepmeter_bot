@@ -54,7 +54,13 @@ class UserService:
         return list(result.all())
     
 
-    async def create(self, tg_user: TgUser, utc_offset: int, reminder_time: time) -> User:
+    async def create(
+        self,
+        tg_user: TgUser,
+        utc_offset: int,
+        reminder_time: time,
+        referred_by: str | None = None,
+    ) -> User:
         """Создает нового пользователя."""
 
         local_datetime = datetime.now(timezone.utc) + timedelta(hours=utc_offset)
@@ -71,6 +77,7 @@ class UserService:
             first_name=tg_user.first_name,
             utc_offset=utc_offset,
             reminder_time=reminder_time,
+            referred_by=referred_by,
             last_reminder_date=last_reminder_date,
         )
 
