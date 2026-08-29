@@ -171,7 +171,7 @@ feedback-cancelled =
     { $cancel_desc } Отправка отменена.
 
 feedback-new =
-    💬 <b>Новая обратная связь</b>
+    { $ex_mark } <b>Новая обратная связь</b>
 
     <b>От:</b> { $full_name }
     <b>Username:</b> @{ $username }
@@ -179,6 +179,21 @@ feedback-new =
 
     <b>Сообщение:</b>
     { $message }
+
+feedback-reply-start =
+    Напишите ответ пользователю.
+
+feedback-reply-cancelled =
+    Ответ отменён.
+
+feedback-reply-sent =
+    { $success }Ответ отправлен пользователю.
+
+feedback-reply-error =
+    Не удалось отправить ответ пользователю.
+
+feedback-developer-answer-title =
+    { $ex_mark } Ответ разработчика на вашу обратную связь:
 
 support-payment-title =
     Поддержать разработчика

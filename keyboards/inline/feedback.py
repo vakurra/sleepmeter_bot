@@ -26,3 +26,25 @@ def get_support_options():
         },
         sizes=(4, 1),
     )
+
+
+def get_feedback_answer_kb(user_id: int):
+    """Кнопка ответа на обратную связь."""
+
+    return get_inline_keyboard(
+        buttons={
+            "Ответить": (f"feedback_reply:{user_id}", "success", None),
+        },
+        sizes=(1,),
+    )
+
+
+def get_feedback_answer_cancel_kb():
+    """Кнопка отмены ответа на обратную связь."""
+
+    return get_inline_keyboard(
+        buttons={
+            "Отменить": ("feedback_reply_cancel", "danger", emoji.CANCEL),
+        },
+        sizes=(1,),
+    )
