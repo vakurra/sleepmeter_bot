@@ -14,7 +14,7 @@ const sleepStartChartCanvas =
 const ratingChartCanvas =
     document.getElementById("rating-chart");
 
-const CHART_Y_AXIS_WIDTH = 50;
+const CHART_Y_AXIS_WIDTH = 42;
 
 
 let ratingChart = null;
@@ -315,9 +315,7 @@ function renderDurationChart(records) {
                             color: colors.text,
 
                             callback: function (value) {
-                                return formatDuration(
-                                    value
-                                );
+                                return `${Math.floor(value / 60)}ч`;
                             },
                         },
 

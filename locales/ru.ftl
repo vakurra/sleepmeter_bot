@@ -33,7 +33,7 @@ start-whats-next = { $question } Чем займемся дальше?
 sleep-record-start = { $moon_desc } Во сколько вы легли спать?
 
 sleep-record-start-notification =
-    { $moon_desc } Доброе утро!
+    { $lightning } Доброе утро!
 
     Давайте сделаем запись за { $record_date }.
     Во сколько вы легли спать?

@@ -13,3 +13,32 @@ def get_admin_users_kb():
         },
         sizes=(1, 1, 1),
     )
+
+
+def get_admin_users_pagination_kb(section: str, page: int, total_pages: int):
+    """Кнопки пагинации списка пользователей."""
+
+    buttons = {}
+
+    if page > 1:
+        buttons["←"] = (
+            f"admin_users_page:{section}:{page - 1}",
+            None,
+            None,
+        )
+
+    buttons[f"{page} / {total_pages}"] = (
+        "admin_users_page:noop:0",
+        None,
+        None,
+    )
+
+    if page < total_pages:
+        buttons["→"] = (f"admin_users_page:{section}:{page + 1}", None, None)
+
+    buttons["Назад"] = ("back_to_admin", "danger", emoji.BACK)
+
+    return get_inline_keyboard(
+        buttons=buttons,
+        sizes=(3, 1),
+    )
