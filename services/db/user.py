@@ -49,6 +49,25 @@ class UserService:
 
         return result.all()
 
+    async def get_all_with_records(self):
+        """Возвращает пользователей, у которых есть записи сна."""
+
+        stmt = (
+            select(
+                User,
+                func.count(SleepRecord.id).label("sleep_records_count"),
+            )
+            .join(
+                SleepRecord,
+                SleepRecord.user_id == User.id,
+            )
+            .group_by(User.id)
+            .order_by(User.created_at.desc())
+        )
+
+        result = await self.session.execute(stmt)
+
+        return result.all()
 
     async def get_new(self, days: int) -> list[User]:
         """Возвращает пользователей, зарегистрированных за последние N дней."""

@@ -241,6 +241,8 @@ admin-users-title =
 admin-users-all-title =
     Все пользователи ({ $count })
 
+admin-users-with-records-title = Пользователи с записями ({ $count })
+
 admin-users-new-title =
     Новые пользователи за 7 дней ({ $count })
 
@@ -251,6 +253,7 @@ admin-users-table =
 admin-users-new-table =
     Имя | Username | Регистрация | Откуда пришёл
     { $rows }
+
 
 
 ##############################################################################################

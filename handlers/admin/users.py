@@ -159,6 +159,38 @@ async def show_all_users(call: CallbackQuery, text: TextService):
     await call.answer()
 
 
+@admin_users_router.callback_query(F.data == "admin_users_with_records")
+async def show_users_with_records(
+    call: CallbackQuery,
+    text: TextService,
+):
+    """Показывает первую страницу пользователей с записями."""
+
+    async with SessionLocal() as session:
+        user_service = UserService(session)
+        users = await user_service.get_all_with_records()
+
+    page_users, page, total_pages, total = paginate_users(users, 1)
+
+    rich_message = build_users_text(
+        page_users,
+        text,
+        "admin-users-with-records-title",
+        count=total,
+    )
+
+    await call.message.edit_text(
+        rich_message=rich_message,
+        reply_markup=get_admin_users_pagination_kb(
+            section="with_records",
+            page=page,
+            total_pages=total_pages,
+        ),
+    )
+
+    await call.answer()
+
+
 @admin_users_router.callback_query(F.data == "admin_users_new_7")
 async def show_new_users(call: CallbackQuery, text: TextService):
     """Показывает первую страницу новых пользователей."""
@@ -206,6 +238,11 @@ async def show_users_page(call: CallbackQuery,text: TextService):
             users = await user_service.get_all_with_stats()
             build_text = build_users_text
             title_key = "admin-users-all-title"
+
+        elif section == "with_records":
+            users = await user_service.get_all_with_records()
+            build_text = build_users_text
+            title_key = "admin-users-with-records-title"
 
         elif section == "new":
             users = await user_service.get_new(7)
